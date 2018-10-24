@@ -1,9 +1,3 @@
-## Sonar Quality Gate Plugin ##
-
-[![Build Status](https://travis-ci.org/usaa/sonar-quality-gates.svg?branch=master)](https://travis-ci.org/usaa/sonar-quality-gates)
-[![Sonar Quality Gate Badge](https://sonarcloud.io/api/project_badges/measure?project=sonar-quality-gates&metric=alert_status)](https://sonarcloud.io/dashboard?id=sonar-quality-gates)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
-
 This Gradle plugin will use the SonarQube API to verify the state of a given project's quality gate(s).
 
 This plugin requires that you also apply and configure the SonarQube plugin and have SonarQube server version 5.6+ and <7.0.
