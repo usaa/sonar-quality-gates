@@ -1,0 +1,32 @@
+language: groovy
+jdk:
+- oraclejdk8
+
+before_cache:
+  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+
+jobs:
+  include:
+    - 
+      script: 
+        - ./gradlew build jacocoTestReport sonarqube
+    - stage: deploy
+      if: tag IS present
+      script: echo "Set up Maven Publish"
+
+addons:
+  sonarcloud:
+    organization: "usaa"
+
+deploy:
+  provider: pages
+  github-token: $GITHUB_TOKEN
+  keep-history: true
+  skip-cleanup: true
+  local-dir: docs
+  on:
+    branch: master

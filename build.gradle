@@ -1,0 +1,139 @@
+buildscript {
+    ext {
+        sonarqubePluginVersion = '2.6.2'
+    }
+    repositories {
+        maven { url "https://repo.usaa.com/artifactory/usaa-mvn" }
+    }
+    dependencies {
+        classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:${sonarqubePluginVersion}"
+        classpath "com.usaa.plugin.gradle:build-defaults-plugin:1.+"
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.4.5"
+    }
+}
+
+apply plugin: "groovy"
+apply plugin: "org.sonarqube"
+apply plugin: "maven-publish"
+apply plugin: "com.jfrog.artifactory"
+apply plugin: "build-defaults"
+
+repositories {
+    maven { url "https://repo.usaa.com/artifactory/usaa-mvn" }
+}
+
+dependencies {
+    implementation gradleApi()
+
+    implementation "org.slf4j:slf4j-api:1.7.16"
+    implementation "org.codehaus.groovy.modules.http-builder:http-builder:0.7"
+    implementation "org.apache.maven:maven-artifact:3.3.3"
+
+    testImplementation localGroovy() //Groovy packaged with gradle distro
+    testImplementation('org.spockframework:spock-core:1.1-groovy-2.4') {
+        exclude group: 'org.codehaus.groovy'
+    }
+    testImplementation gradleTestKit()
+}
+
+configurations {
+    integrationTestCompile.extendsFrom testImplementation
+    integrationTestRuntime.extendsFrom testRuntime
+
+    functionalTestCompile.extendsFrom testImplementation
+    functionalTestRuntime.extendsFrom testRuntime
+}
+
+test {
+    testLogging {
+        // Make sure output from
+        // standard out or error is shown
+        // in Gradle output.
+        showStandardStreams = true
+ 
+        // Or we use events method:
+        // events "standard_out", "standard_error"
+ 
+        // Or set property events:
+        // events = ["standard_out", "standard_error"]
+ 
+        // Instead of string values we can
+        // use enum values:
+        // events org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_OUT,
+        //        org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_ERROR,
+    }
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+  classifier = "sources"
+  from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: groovydoc) {
+  classifier = "javadoc"
+  from groovydoc.destinationDir
+}
+
+groovydoc {
+  // tell groovydoc to create links to Java/Groovy/Gradle docs instead of just printing names
+  link ("https://docs.oracle.com/javase/${JavaVersion.toVersion(project.targetCompatibility).majorVersion}/docs/api/", "java.", "javax.")
+  link ("http://docs.groovy-lang.org/${GroovySystem.version}/html/api/", "groovy.", "org.codehaus.groovy.")
+  link ("https://docs.gradle.org/${GradleVersion.current().version}/javadoc/", "org.gradle.")
+
+  // these docs are more for plugin developers than end-users, so include everything
+  includePrivate = true
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+        }
+    }
+}
+
+artifactory {
+  publish {
+    repoKey = project.version.endsWith("-SNAPSHOT") ? "usaa-mvn-internal-snapshots" : "usaa-mvn-internal"
+    defaults {
+      publications ("mavenJava")
+    }
+  }
+}
+
+sourceSets {
+    integrationTest {
+        groovy.srcDir file('src/integTest/groovy')
+        resources.srcDir file('src/integTest/resources')
+        compileClasspath += sourceSets.main.output + configurations.testRuntime
+        runtimeClasspath += output + compileClasspath
+    }
+    functionalTest {
+        groovy.srcDir file('src/functTest/groovy')
+        resources.srcDir file('src/functTest/resources')
+        compileClasspath += sourceSets.main.output + configurations.testRuntime
+        runtimeClasspath += output + compileClasspath
+    }
+}
+
+task integrationTest(type: Test) {
+    description = 'Runs the integration tests.'
+    group = 'verification'
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+    mustRunAfter test
+    test {
+        testLogging {
+            showStandardStreams = true
+        }
+    }
+}
+
+check.dependsOn integrationTest
