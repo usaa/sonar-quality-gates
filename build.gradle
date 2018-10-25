@@ -95,15 +95,6 @@ publishing {
     }
 }
 
-artifactory {
-  publish {
-    repoKey = project.version.endsWith("-SNAPSHOT") ? "usaa-mvn-internal-snapshots" : "usaa-mvn-internal"
-    defaults {
-      publications ("mavenJava")
-    }
-  }
-}
-
 sourceSets {
     integrationTest {
         groovy.srcDir file('src/integTest/groovy')
