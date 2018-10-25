@@ -1,24 +1,15 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    ext {
-        sonarqubePluginVersion = '2.6.2'
-    }
-    dependencies {
-        classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:${sonarqubePluginVersion}"
-    }
+plugins {
+    id "groovy"
+    id "jacoco"
+    id "org.sonarqube" version "2.6"
+    id "com.gradle.plugin-publish" version "0.10.0"
+    id "java-gradle-plugin"
 }
-
-apply plugin: "groovy"
-apply plugin: "jacoco"
-apply plugin: "org.sonarqube"
-apply plugin: "maven-publish"
 
 version = System.getenv('TRAVIS_TAG') ? version : version + "-SNAPSHOT"
 
 repositories {
-    mavenCentral()
+    jcenter()
 }
 
 dependencies {
@@ -88,31 +79,30 @@ artifacts {
     archives javadocJar
 }
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            /*
-            pom {
-                description = 'Sonar quality gate management and verification'
-                url = 'https://www.github.com/usaa/sonar-quality-gates'
-                licenses {
-                    license {
-                        name = 'The Apache License, Version 2.0'
-                        url = 'http://www.apache.prg/licenses/LICENSE-2.0.txt'
-                    }
-                }
-                developers {
-                    developer {
-                        id = 'geofflancaster'
-                        name = 'Geoff Lancaster'
-                    }
-                }
-            }
-            */
-            from components.java
-            artifact sourcesJar
-            artifact javadocJar
+gradlePlugin {
+    plugins {
+        sonarPlugin {
+            id = 'com.usaa.sonar-quality-gates'
+            implementationClass = 'com.usaa.plugin.gradle.sonarqube.SonarqubeQualityGatePlugin'
         }
+    }
+}
+
+pluginBundle {
+    website = 'https://usaa.github.io/sonar-quality-gates'
+    vcsUrl = 'https://www.github.com/usaa/sonar-quality-gates'
+    description = 'Sonar quality gate/profile administration and gate verification.'
+    tags = ['sonar', 'admin', 'gate', 'quality-gate']
+
+    plugins {
+        sonarPlugin {
+            displayName = 'Sonar Quality Plugin'
+        }
+    }
+
+    mavenCoordinates {
+        groupId = 'com.usaa.plugins.gradle'
+        artifactId = 'sonar-quality-gates'
     }
 }
 
