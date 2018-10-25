@@ -2,25 +2,14 @@ buildscript {
     ext {
         sonarqubePluginVersion = '2.6.2'
     }
-    repositories {
-        maven { url "https://repo.usaa.com/artifactory/usaa-mvn" }
-    }
     dependencies {
         classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:${sonarqubePluginVersion}"
-        classpath "com.usaa.plugin.gradle:build-defaults-plugin:1.+"
-        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.4.5"
     }
 }
 
 apply plugin: "groovy"
 apply plugin: "org.sonarqube"
 apply plugin: "maven-publish"
-apply plugin: "com.jfrog.artifactory"
-apply plugin: "build-defaults"
-
-repositories {
-    maven { url "https://repo.usaa.com/artifactory/usaa-mvn" }
-}
 
 dependencies {
     implementation gradleApi()
