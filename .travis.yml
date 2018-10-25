@@ -16,7 +16,9 @@ jobs:
         - ./gradlew build jacocoTestReport 
     - stage: deploy
       if: tag IS present
-      script: echo "Set up Maven Publish"
+      script: 
+        - echo "Deploy to Gradle Plugins"
+        - ./gradlew publishPlugins -Dgradle.publish.key=$PUBLISH_KEY -Dgradle.publish.secret=$PUBLISH_SECRET
 
 addons:
   sonarcloud:
