@@ -96,7 +96,7 @@ pluginBundle {
 
     plugins {
         sonarPlugin {
-            displayName = 'Sonar Quality Plugin'
+            displayName = 'Sonar Quality Gate Plugin'
         }
     }
 }
