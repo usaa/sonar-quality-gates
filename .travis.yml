@@ -13,7 +13,7 @@ jobs:
   include:
     - 
       script: 
-        - ./gradlew build jacocoTestReport sonarqube
+        - ./gradlew build sonarqube -x test
     - stage: deploy
       if: tag IS present
       script: echo "Set up Maven Publish"
