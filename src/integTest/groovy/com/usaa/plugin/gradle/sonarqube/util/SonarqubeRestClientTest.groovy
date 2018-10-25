@@ -6,9 +6,9 @@ import spock.lang.Subject
 
 class SonarqubeRestClientTest extends Specification {
 
-    @Subject SonarqubeRestClient client = new SonarqubeRestClient('http://prodsonar1l:9002')
+    @Subject SonarqubeRestClient client = new SonarqubeRestClient('https://sonarcloud.io')
 
-    private final TEST_PROJECT_KEY = 'git:com.usaa.plugin.gradle:sonarqube-quality-gates-plugin'
+    private final TEST_PROJECT_KEY = 'sonar-quality-gates'
 
     def "can get component id"() {
         when:
