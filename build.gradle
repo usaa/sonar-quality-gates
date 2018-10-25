@@ -1,4 +1,7 @@
 buildscript {
+    repositories {
+        mavenCentral()
+    }
     ext {
         sonarqubePluginVersion = '2.6.2'
     }
@@ -10,6 +13,10 @@ buildscript {
 apply plugin: "groovy"
 apply plugin: "org.sonarqube"
 apply plugin: "maven-publish"
+
+repositories {
+    mavenCentral()
+}
 
 dependencies {
     implementation gradleApi()
