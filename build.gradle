@@ -99,11 +99,6 @@ pluginBundle {
             displayName = 'Sonar Quality Plugin'
         }
     }
-
-    mavenCoordinates {
-        groupId = 'com.usaa.plugins.gradle'
-        artifactId = 'sonar-quality-gates'
-    }
 }
 
 sourceSets {
