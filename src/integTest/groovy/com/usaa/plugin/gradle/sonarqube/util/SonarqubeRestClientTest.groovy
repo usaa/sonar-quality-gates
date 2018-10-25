@@ -16,7 +16,7 @@ class SonarqubeRestClientTest extends Specification {
 
         then:
         compId != null
-        compId == 'AWU_thINVlFUu60bv18n'
+        compId == 'AWao03GwCbT38AxgDmPq'
     }
 
     def "can not find component"() {
@@ -36,23 +36,25 @@ class SonarqubeRestClientTest extends Specification {
         status == SonarqubeRestClient.ScanStatus.COMPLETE
     }
 
+/* Commented out because SonarCloud is using a newer version of the SonarQube API
     def "can get execution date"() {
         when:
-        def date = client.getExecutionDate(TEST_PROJECT_KEY, '2.0.0-osf-prepare-SNAPSHOT')
+        def date = client.getExecutionDate(TEST_PROJECT_KEY, '2.0.0')
+        print(date.toString())
 
         then:
-        date.equals(Date.parse(SonarqubeRestClient.DATE_FORMAT, '2018-08-22T15:02:55-0500'))
+        date.equals(Date.parse(SonarqubeRestClient.DATE_FORMAT, '2018-10-24T24:31:27-0500'))
     }
-
+    
     def "can validate quality gates -- none blocking"() {
         when:
-        def date = Date.parse(SonarqubeRestClient.DATE_FORMAT, '2018-08-22T15:02:55-0500')
+        def date = Date.parse(SonarqubeRestClient.DATE_FORMAT, '2018-10-24T20:31:27-0500')
         def status = client.getQualityGateStatus(TEST_PROJECT_KEY, date)
 
         then:
         status == SonarqubeRestClient.QualityGateStatus.NONE
     }
-/*
+
     def "can validate quality gates -- warning"() {
         when:
         def date = Date.parse(SonarqubeRestClient.DATE_FORMAT, '')
@@ -64,10 +66,10 @@ class SonarqubeRestClientTest extends Specification {
 */
     def "can get quality gate id"() {
         when:
-        def id = client.getQualityGateId('SonarQube way')
+        def id = client.getQualityGateId('Sonar way')
 
         then:
-        id == '10000'
+        id == '9'
     }
 
     def "can get scan status"() {

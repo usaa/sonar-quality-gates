@@ -15,6 +15,8 @@ apply plugin: "jacoco"
 apply plugin: "org.sonarqube"
 apply plugin: "maven-publish"
 
+version = System.getenv('TRAVIS_TAG') ? version : version + "-SNAPSHOT"
+
 repositories {
     mavenCentral()
 }
@@ -89,6 +91,24 @@ artifacts {
 publishing {
     publications {
         mavenJava(MavenPublication) {
+            /*
+            pom {
+                description = 'Sonar quality gate management and verification'
+                url = 'https://www.github.com/usaa/sonar-quality-gates'
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.prg/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'geofflancaster'
+                        name = 'Geoff Lancaster'
+                    }
+                }
+            }
+            */
             from components.java
             artifact sourcesJar
             artifact javadocJar
