@@ -1,0 +1,15 @@
+name: Publish
+
+on: [tags]
+
+ jobs:
+  build:
+
+     runs-on: ubuntu-latest
+
+     steps:
+    - name: Publish
+      env:
+        PUBLISH_KEY: ${{secrets.PUBLISH_KEY}}
+        PUBLISH_SECRET: ${{secrets.PUBLISH_SECRET}}
+      run: ./gradlew publishPlugins -Dgradle.publish.key=$PUBLISH_KEY -Dgradle.publish.secret=$PUBLISH_SECRET
