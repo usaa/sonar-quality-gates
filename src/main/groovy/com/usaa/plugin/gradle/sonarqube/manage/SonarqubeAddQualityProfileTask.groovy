@@ -26,9 +26,7 @@ class SonarqubeAddQualityProfileTask extends SonarqubeBaseTask {
         if (Helpers.sonarPluginExists(project)) {
             populateRequiredVariables()
 
-            if (!client.getProjectId(this.projectKey)) {
-                client.createProject(this.projectKey, this.projectName)
-            }
+            client.projectExists(this.projectKey)?: client.createProject(this.projectKey, this.projectName)
 
             if (client.applyQualityProfile(this.projectKey, this.profile, this.language)) {
                 logger.info('Profile {} applied', this.profile)

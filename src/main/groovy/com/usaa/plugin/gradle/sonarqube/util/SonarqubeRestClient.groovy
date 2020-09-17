@@ -22,7 +22,6 @@ class SonarqubeRestClient {
 
     enum QualityGateStatus {
         OK,
-        WARN,
         ERROR,
         NONE
     }
@@ -30,10 +29,11 @@ class SonarqubeRestClient {
     public static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ"
 
     private static final Logger logger = LoggerFactory.getLogger(SonarqubeRestClient.class)
-    private static final String AUTH_HEADER_KEY = "Authorization"
+    
+    protected static final String AUTH_HEADER_KEY = "Authorization"
 
-    private final HTTPBuilder http
-    private final String authHeader
+    protected final HTTPBuilder http
+    protected final String authHeader
 
     SonarqubeRestClient(String serverUrl) {
         this.http = new HTTPBuilder(serverUrl, ContentType.JSON)
@@ -46,28 +46,6 @@ class SonarqubeRestClient {
 
     SonarqubeRestClient(String serverUrl, String apiKey) {
         this(serverUrl, apiKey, "")
-    }
-
-    Date getExecutionDate(String projectKey, String version) {
-        logger.debug('Getting execution date for projectKey<{}> and version<{}>', projectKey, version)
-        http.request(Method.GET, ContentType.JSON) { req ->
-            uri.path = '/api/events'
-            uri.query = [resource: projectKey, categories: 'Version']
-            response.success = { resp, json ->
-                for (obj in json) {
-                    if (version == obj.n) {
-                        return Date.parse(DATE_FORMAT, obj.dt)
-                    }
-                }
-                return null
-            }
-            response.'404' = { resp ->
-                // Added additional output here because standard output of 'Not Found' isn't very valuable.
-                // Other methods don't need because if one is available, the rest will exist.
-                logger.error('Unable to find execution date with projectKey <{}> and version <{}>', projectKey, version)
-                throw new HttpResponseException(resp as Object)
-            }
-        }
     }
 
     String getComponentId(String projectKey) {
@@ -87,55 +65,48 @@ class SonarqubeRestClient {
         }
     }
 
-    ScanStatus getScanStatus(String componentId) {
-        logger.debug('Getting scan status for componentId <{}>', componentId)
-        http.get(path: '/api/ce/component', query: [componentId: componentId]) { resp, json ->
+    ScanStatus getScanStatus(String projectKey) {
+        logger.debug('Getting scan status for component <{}>', projectKey)
+        http.get(path: '/api/ce/component', query: [component: projectKey]) { resp, json ->
             if (json.queue.size() > 0) {
                 return ScanStatus.QUEUED
             } else if (json.current.status == 'SUCCESS') {
                 return ScanStatus.COMPLETE
-            } else {
+            } else if (json.current.status == 'IN_PROGRESS') {
                 return ScanStatus.IN_PROGRESS
+            } else {
+                return ScanStatus.FAILED
             }
         }
     }
 
-    QualityGateStatus getQualityGateStatus(String projectKey, Date executionDate) {
-        logger.debug('Getting quality gate status for projectKey <{}> and executionDate <{}>', projectKey, executionDate.format(DATE_FORMAT))
+    QualityGateStatus getQualityGateStatus(String projectKey) {
+        logger.debug('Getting quality gate status for projectKey <{}>', projectKey)
 
-        Date endDate = null
-        use(TimeCategory) {
-            endDate = executionDate + 1.second
-            endDate
-        }
-
-        http.get(path: '/api/timemachine',
-                query: [
-                        resource    : projectKey,
-                        metrics     : 'alert_status',
-                        fromDateTime: executionDate.format(DATE_FORMAT),
-                        toDateTime  : endDate.format(DATE_FORMAT)
-                ],
+        http.get(path: '/api/qualitygates/project_status',
+                query: [projectKey: projectKey],
         ) { resp, json ->
-            for (obj in json) {
-                if (obj.cells.size() == 0) {
-                    return QualityGateStatus.NONE
-                }
-                return QualityGateStatus.valueOf(obj.cells[0].v[0])
+            if(json.errors && json.errors.size() > 0) {
+                logger.debug("Error checking quality gate: {}", resp.errors.toString())
             }
+            return QualityGateStatus.valueOf(json.projectStatus.status)
         }
     }
 
-    String getProjectId(String projectKey) {
-        logger.debug('Getting projectId for projectKey <{}>', projectKey)
-        http.get(path: '/api/projects/index',
+    boolean projectExists(String projectKey) {
+        logger.debug('Search for projectKey <{}>', projectKey)
+        http.get(path: '/api/projects/search',
+                headers: [
+                        (this.AUTH_HEADER_KEY): authHeader
+                ],
                 query: [
-                        key: projectKey
+                        projects: projectKey
                 ],
         ) { resp, json ->
-            for (proj in json) {
-                return proj.id
+            if(json.components.size() > 0) {
+                return true
             }
+            return false
         }
     }
 
@@ -153,8 +124,8 @@ class SonarqubeRestClient {
         }
     }
 
-    boolean applyQualityGate(String projectId, String gateId) {
-        logger.debug('Applying quality gate <{}> to project <{}>', gateId, projectId)
+    boolean applyQualityGate(String projectKey, String gateId) {
+        logger.debug('Applying quality gate <{}> to project <{}>', gateId, projectKey)
 
         http.post(path: '/api/qualitygates/select',
                 headers: [
@@ -162,13 +133,13 @@ class SonarqubeRestClient {
                 ],
                 contentType: 'application/json',
                 body: [
-                        "projectId": projectId,
+                        "projectKey": projectKey,
                         "gateId": gateId,
                 ],
         ) { resp, json ->
             logger.debug('Apply gate response code: {}', resp.status)
             if (resp.status != HttpStatus.SC_NO_CONTENT) {
-                throw new QualityGateApplyFailedException("Unable to apply gate: " + gateId + " to project " + projectId +  \
+                throw new QualityGateApplyFailedException("Unable to apply gate: " + gateId + " to project " + projectKey +  \
                      ". error: " + resp.status + "-" + resp.errors[0].msg)
             }
             return true
@@ -208,13 +179,14 @@ class SonarqubeRestClient {
                 ],
                 contentType: ContentType.JSON,
                 body: [
-                        "key": projectKey,
+                        "project": projectKey,
                         "name": projectName
                 ],
         ) { resp, json ->
             logger.debug('Create project response code: {}', resp.status)
-            if (json && json.id) {
-                return json.id
+            if (json && json.project.key) {
+                logger.info('Project with key {} created.', projectKey)
+                return json.project.key
             }
             throw new SonarCreateProjectFailedException(projectKey)
         }

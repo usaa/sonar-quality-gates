@@ -1,5 +1,10 @@
 ##Changelog
 
+### 3.0.0
+  - Now supports version 6.3+. No longer supports prior versions.
+  - Improved testing.
+  - Removed `failOnWarn` as the "Warn" value is no longer available in Sonar.
+
 ### 2.0.0
   - Removed credential retrieval. All projects must specify credentials to apply gates/profiles.
 

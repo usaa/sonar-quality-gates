@@ -33,7 +33,6 @@ workflow, including the sonar scan.
 Any of the following options are available. You can override one or all as required.
 ```
 sonarqubeQualityGate {
-  failOnWarn true // use this variable to force a failure if warnings exist. Default: false
   sleep '1000' // the amount of time to sleep between api calls while scan is queued. Time is in milliseconds. Default: 1000
   maxWait '1800000' // the amount of time to wait for scan to complete before failing. Time is in milliseconds. Default: 1800000 (30min)
   gate 'Sonar way' // override default gate
@@ -47,7 +46,6 @@ sonarqubeQualityGate {
 **Default Settings**
 
 ```
-failOnWarn false
 sleep '1000'
 maxWait '1800000'
 gate 'SonarQube way'

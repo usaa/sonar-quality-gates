@@ -6,6 +6,7 @@ import com.usaa.plugin.gradle.sonarqube.util.ISonarQubeTask
 import com.usaa.plugin.gradle.sonarqube.util.SonarqubeRestClient
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.tasks.Internal
 
 class SonarqubeBaseTask extends DefaultTask {
 
@@ -16,6 +17,7 @@ class SonarqubeBaseTask extends DefaultTask {
     protected String password
     protected String apiKey
 
+    @Internal
     protected SonarqubeRestClient client
 
     SonarqubeBaseTask() {

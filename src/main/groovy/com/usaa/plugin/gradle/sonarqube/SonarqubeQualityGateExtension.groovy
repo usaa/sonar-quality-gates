@@ -1,7 +1,6 @@
 package com.usaa.plugin.gradle.sonarqube
 
 class SonarqubeQualityGateExtension {
-    private boolean failOnWarn = false
     private String maxWait = "1800000"
     private String sleep = "1000"
     private String gate = "SonarQube way"
@@ -10,14 +9,6 @@ class SonarqubeQualityGateExtension {
     private String username
     private String password
     private String apiKey
-
-    boolean getFailOnWarn() {
-        return failOnWarn
-    }
-
-    void setFailOnWarn(boolean value) {
-        this.failOnWarn = value
-    }
 
     String getMaxWait() {
         return maxWait

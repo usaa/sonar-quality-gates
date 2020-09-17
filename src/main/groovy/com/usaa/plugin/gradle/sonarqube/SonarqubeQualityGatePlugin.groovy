@@ -26,7 +26,6 @@ class SonarqubeQualityGatePlugin implements Plugin<Project> {
             Task verifyTask = project.getTasks().create("verifySonarqubeQualityGates", SonarqubeQualityGateTask.class, new Action<SonarqubeQualityGateTask>() {
                 void execute(SonarqubeQualityGateTask task) {
                     logger.info('Setting sleep to {}', extension.getSleep())
-                    task.setFailOnWarn(extension.getFailOnWarn())
                     task.setSleepAmount(extension.getSleep().toInteger())
                     task.setMaxWait(extension.getMaxWait().toInteger())
                 }

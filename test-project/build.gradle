@@ -1,0 +1,45 @@
+buildscript{
+	repositories {
+		mavenCentral()
+		flatDir {
+			dirs "../build/libs" 
+		}
+	}
+    dependencies {
+		classpath 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.1'
+		classpath 'com.usaa.plugin.gradle:sonar-quality-gates-plugin:3.0.0-SNAPSHOT'
+    }
+}
+
+plugins {
+	id 'org.springframework.boot' version '2.3.3.RELEASE'
+	id 'io.spring.dependency-management' version '1.0.10.RELEASE'
+	id 'java'
+	id 'org.sonarqube' version '3.0'
+}
+
+apply plugin: 'com.usaa.sonar-quality-gates'
+
+group = 'com.usaa.sonar-quality-gates.test'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter'
+	testImplementation('org.springframework.boot:spring-boot-starter-test') {
+		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+	}
+}
+
+test {
+	useJUnitPlatform()
+}
+
+sonarqubeQualityGate {
+  gate 'test-gate' // override default gate
+  profile 'Sonar way' // override default profile
+}

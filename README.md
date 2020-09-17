@@ -6,9 +6,15 @@
 
 This Gradle plugin will use the SonarQube API to verify the state of a given project's quality gate(s).
 
-This plugin requires that you also apply and configure the SonarQube plugin and have SonarQube server version 5.6+ and <7.0.
+This plugin requires that you also apply and configure the SonarQube plugin and have SonarQube server version 6.3+.
 
 If the project does not already exist within SonarQube, it will be created.
+
+### Version compatibility
+| Sonar version | Plugin Version |
+|---|---|
+| 6.3+ | 3.+ |
+| 5.6 - 7.0 | 1.+ |
 
 #### Usage:
 ```
@@ -39,7 +45,6 @@ workflow, including the sonar scan.
 Any of the following options are available. You can override one or all as required.
 ```
 sonarqubeQualityGate {
-  failOnWarn true // use this variable to force a failure if warnings exist. Default: false
   sleep '1000' // the amount of time to sleep between api calls while scan is queued. Time is in milliseconds. Default: 1000
   maxWait '1800000' // the amount of time to wait for scan to complete before failing. Time is in milliseconds. Default: 1800000 (30min)
   gate 'Sonar way' // override default gate
@@ -53,7 +58,6 @@ sonarqubeQualityGate {
 **Default Settings**
 
 ```
-failOnWarn false
 sleep '1000'
 maxWait '1800000'
 gate 'SonarQube way'
