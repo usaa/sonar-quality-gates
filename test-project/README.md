@@ -1,0 +1,1 @@
+Test projects are created from Spring Initializr and edited to fit the various Quality Gate statuses.

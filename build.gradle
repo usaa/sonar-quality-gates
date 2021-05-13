@@ -1,7 +1,6 @@
 plugins {
     id "groovy"
     id "jacoco"
-    id "org.sonarqube" version "2.6"
     id "com.gradle.plugin-publish" version "0.10.0"
     id "java-gradle-plugin"
 }
@@ -36,21 +35,7 @@ configurations {
 
 test {
     testLogging {
-        // Make sure output from
-        // standard out or error is shown
-        // in Gradle output.
         showStandardStreams = true
- 
-        // Or we use events method:
-        // events "standard_out", "standard_error"
- 
-        // Or set property events:
-        // events = ["standard_out", "standard_error"]
- 
-        // Instead of string values we can
-        // use enum values:
-        // events org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_OUT,
-        //        org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_ERROR,
     }
 }
 
@@ -68,7 +53,7 @@ groovydoc {
   // tell groovydoc to create links to Java/Groovy/Gradle docs instead of just printing names
   link ("https://docs.oracle.com/javase/${JavaVersion.toVersion(project.targetCompatibility).majorVersion}/docs/api/", "java.", "javax.")
   link ("http://docs.groovy-lang.org/${GroovySystem.version}/html/api/", "groovy.", "org.codehaus.groovy.")
-  link ("https://docs.gradle.org/${GradleVersion.current().version}/javadoc/", "org.gradle.")
+  link ("https://docs.gradle.org/${project.getGradle().getGradleVersion()}/javadoc/", "org.gradle.")
 
   // these docs are more for plugin developers than end-users, so include everything
   includePrivate = true
@@ -128,5 +113,3 @@ task integrationTest(type: Test) {
         }
     }
 }
-
-check.dependsOn integrationTest

@@ -6,76 +6,46 @@ import spock.lang.Subject
 
 class SonarqubeRestClientTest extends Specification {
 
-    @Subject SonarqubeRestClient client = new SonarqubeRestClient('https://sonarcloud.io')
+    @Subject client = new SonarqubeRestClient('http://localhost:9000')
 
-    private final TEST_PROJECT_KEY = 'sonar-quality-gates'
-
-    def "can get component id"() {
-        when:
-        def compId = client.getComponentId(TEST_PROJECT_KEY)
-
-        then:
-        compId != null
-        compId == 'AWao03GwCbT38AxgDmPq'
-    }
-
-    def "can not find component"() {
-        when:
-        client.getComponentId('does-not-exist')
-
-        then:
-        thrown(HttpResponseException)
-    }
+    private SUCCESS_TEST_PROJECT_KEY = 'com.usaa.sonar-quality-gates.test:test-project'
+    private ERROR_TEST_PROJECT_KEY = 'com.usaa.sonar-quality-gates.test:error-project'
 
     def "can get project status -- success"() {
         when:
-        def compId = client.getComponentId(TEST_PROJECT_KEY)
-        def status = client.getScanStatus(compId)
+        def status = client.getScanStatus(SUCCESS_TEST_PROJECT_KEY)
 
         then:
         status == SonarqubeRestClient.ScanStatus.COMPLETE
     }
-
-/* Commented out because SonarCloud is using a newer version of the SonarQube API
-    def "can get execution date"() {
-        when:
-        def date = client.getExecutionDate(TEST_PROJECT_KEY, '2.0.0')
-        print(date.toString())
-
-        then:
-        date.equals(Date.parse(SonarqubeRestClient.DATE_FORMAT, '2018-10-24T24:31:27-0500'))
-    }
     
-    def "can validate quality gates -- none blocking"() {
+    def "can validate quality gates -- success"() {
         when:
-        def date = Date.parse(SonarqubeRestClient.DATE_FORMAT, '2018-10-24T20:31:27-0500')
-        def status = client.getQualityGateStatus(TEST_PROJECT_KEY, date)
+        def status = client.getQualityGateStatus(SUCCESS_TEST_PROJECT_KEY)
 
         then:
-        status == SonarqubeRestClient.QualityGateStatus.NONE
+        status == SonarqubeRestClient.QualityGateStatus.OK
     }
 
-    def "can validate quality gates -- warning"() {
+    def "can validate quality gates -- error"() {
         when:
-        def date = Date.parse(SonarqubeRestClient.DATE_FORMAT, '')
-        def status = client.getQualityGateStatus(TEST_PROJECT_KEY, date)
+        def status = client.getQualityGateStatus(ERROR_TEST_PROJECT_KEY)
 
         then:
-        status == SonarqubeRestClient.QualityGateStatus.WARN
+        status == SonarqubeRestClient.QualityGateStatus.ERROR
     }
-*/
+
     def "can get quality gate id"() {
         when:
         def id = client.getQualityGateId('Sonar way')
 
         then:
-        id == '9'
+        id == '1'
     }
 
     def "can get scan status"() {
         when:
-        def compId = client.getComponentId(TEST_PROJECT_KEY)
-        def status = client.getScanStatus(compId)
+        def status = client.getScanStatus(SUCCESS_TEST_PROJECT_KEY)
 
         then:
         status == SonarqubeRestClient.ScanStatus.COMPLETE

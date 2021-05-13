@@ -22,13 +22,13 @@ class SonarqubeAddQualityGateTask extends SonarqubeBaseTask {
         if (Helpers.sonarPluginExists(project)) {
             populateRequiredVariables()
 
-            String projectId = client.getProjectId(this.projectKey)?: client.createProject(this.projectKey, this.projectName)
+            client.projectExists(this.projectKey)?: client.createProject(this.projectKey, this.projectName)
 
             String gateId = client.getQualityGateId(this.gate)
             if (!gateId) {
                 throw new QualityGateNotFoundException(this.gate)
             }
-            client.applyQualityGate(projectId, gateId)
+            client.applyQualityGate(this.projectKey, gateId)
             logger.info('Gate {} applied', this.gate)
         } else {
             throw new QualityGatesNotConfiguredException('The sonarqube plugin is not applied to this project')

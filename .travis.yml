@@ -1,6 +1,13 @@
 language: groovy
 jdk:
-- oraclejdk8
+- oraclejdk13
+
+services:
+  - docker
+
+env:
+  global:
+    - SONARQUBE_VERSION="7.9-community"
 
 before_cache:
   - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
@@ -11,9 +18,32 @@ cache:
 
 jobs:
   include:
-    - 
+    - stage: build
       script: 
-        - ./gradlew build jacocoTestReport 
+        - ./gradlew build jacocoTestReport
+    - stage: test
+      script:
+        # start tests -- build again in the same job since we can't pass libs from build to test jobs
+        - ./gradlew build
+        # spin up sonar server
+        - docker run -d -p 9000:9000 --name sonarqube sonarqube:$SONARQUBE_VERSION
+        # wait for it to start up
+        - for ((i=1; i<=300; i++)) { sleep 1; if docker ps -aqf "ancestor=sonarqube:$SONARQUBE_VERSION" | xargs docker logs 2>&1 | grep "SonarQube is up" &> /dev/null; then return 0; fi } && return 1
+        # remove env vars that travis sets to prevent sonar from running on forked branches
+        - unset SONARQUBE_SCANNER_PARAMS
+        - unset SONARQUBE_SKIPPED
+        - cd test-project
+        # create admin token
+        - export JSON=`curl -X POST -u "admin:admin" http://localhost:9000/api/user_tokens/generate?name=token`
+        - export TOKEN=`docker run python:3.9-rc-slim python3 -c 'import sys, json; print(json.loads(sys.argv[1])["token"]);' $(echo $JSON)`
+        # create gate based on the "Sonar way" gate
+        - curl -X POST -u "$TOKEN:" 'http://localhost:9000/api/qualitygates/copy?id=1&name=test-gate'
+        # run with base gate which will pass
+        - ./gradlew applyQualityGate sonarqube verifySonarqubeQualityGates -Dsonar.host.url=http://localhost:9000 -Dsonar.login=$TOKEN
+        # apply more strict rules to gate
+        - curl -X POST -u "$TOKEN:" 'http://localhost:9000/api/qualitygates/create_condition?gateId=2&metric=vulnerabilities&op=GT&error=0'
+        # negate the exit code since a failure is actually success
+        - "! ./gradlew applyQualityGate sonarqube verifySonarqubeQualityGates -Dsonar.host.url=http://localhost:9000 -Dsonar.login=$TOKEN"
     - stage: deploy
       if: tag IS present
       script: 
@@ -32,3 +62,12 @@ deploy:
   local-dir: docs
   on:
     branch: master
+
+
+# setup gate
+# spin up docker image
+# get user token
+# copy existing gate
+# curl -X POST 'http://localhost:9000/api/qualitygates/copy?id=1&name=test-gate'
+# curl -X POST 'http://localhost:9000/api/qualitygates/create_condition?gateId=2&metric=vulnerabilities&op=GT&error=0' \
+# ./gradlew applyQualityGate sonarqube verifySonarqubeQualityGates -Dsonar.host.url=http://localhost:9000  -Dsonar.login=<token>
