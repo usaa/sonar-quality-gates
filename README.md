@@ -22,7 +22,7 @@ If the project does not already exist within SonarQube, it will be created.
 buildscript {
   dependencies {
     classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.2.1"
-    classpath "com.usaa.plugin.gradle:sonarqube-quality-gates:1.0"
+    classpath "com.usaa.plugin.gradle:sonarqube-quality-gates:3.0.0"
   }
 }
 apply plugin: 'org.sonarqube'
