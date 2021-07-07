@@ -39,7 +39,6 @@ jobs:
         # create gate based on the "Sonar way" gate
         - curl -X POST -u "$TOKEN:" 'http://localhost:9000/api/qualitygates/copy?id=1&name=test-gate'
         # run with base gate which will pass
-        - ls -latr ../build/libs
         - ./gradlew applyQualityGate sonarqube verifySonarqubeQualityGates -Dsonar.host.url=http://localhost:9000 -Dsonar.login=$TOKEN
         # apply more strict rules to gate
         - curl -X POST -u "$TOKEN:" 'http://localhost:9000/api/qualitygates/create_condition?gateId=2&metric=vulnerabilities&op=GT&error=0'
