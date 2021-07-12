@@ -62,12 +62,3 @@ deploy:
   local-dir: docs
   on:
     branch: master
-
-
-# setup gate
-# spin up docker image
-# get user token
-# copy existing gate
-# curl -X POST 'http://localhost:9000/api/qualitygates/copy?id=1&name=test-gate'
-# curl -X POST 'http://localhost:9000/api/qualitygates/create_condition?gateId=2&metric=vulnerabilities&op=GT&error=0' \
-# ./gradlew applyQualityGate sonarqube verifySonarqubeQualityGates -Dsonar.host.url=http://localhost:9000  -Dsonar.login=<token>
