@@ -20,6 +20,3 @@ jobs:
           gradle-project-path: "gradle-example"
           gradle-build-module: ":app"
 
-
-- name: Gradle Dependency Submission
-  uses: mikepenz/gradle-dependency-submission@v0.8.5
