@@ -17,8 +17,10 @@ jobs:
       - name: Run snapshot action
         uses: mikepenz/gradle-dependency-submission@v0.8.5
         with:
-          gradle-project-path: ""
-          gradle-build-module: ":app"
+          gradle-build-module: |-
+            :
+          gradle-build-configuration: |-
+            compileClasspath
 
   compile:
     runs-on: ubuntu-latest
