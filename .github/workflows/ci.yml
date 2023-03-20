@@ -3,20 +3,9 @@ on:
   push:
     branches:
       - master # run the action on your projects default branch
-
 jobs:
-  dependency_submission:
-    name: GitHub Gradlew Dependency Submission
-    runs-on: ubuntu-latest
-    permissions: # The Dependency Submission API requires write permission
-      contents: write
-    steps:
-      - name: 'Checkout Repository'
-        uses: actions/checkout@v3  
-      - name: Run gradle snapshot action
-        uses: mikepenz/gradle-dependency-submission@v0.8.5
-
   compile:
+    name: Gradle Compile
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
