@@ -16,8 +16,6 @@ jobs:
         
       - name: Run snapshot action
         uses: mikepenz/gradle-dependency-submission@v0.8.5
-        with:
-          gradle-project-path: sonar-quality-gates
 
   compile:
     runs-on: ubuntu-latest
